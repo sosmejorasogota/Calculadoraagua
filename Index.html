@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calculadora de consumo de agua – Hogar</title>
+  <style>
+    :root{
+      --bg:#f7f8fa; --card:#ffffff; --text:#111; --muted:#555;
+      --blue:#e9f3ff; --blue2:#cfe6ff; --border:#e6e8ee; --brand:#185adb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg); color:var(--text)}
+    .wrap{max-width:1080px; margin:0 auto; padding:22px}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,.06); padding:18px}
+    h1{font-size:22px; margin:0 0 6px}
+    p.muted{color:var(--muted); margin:0 0 12px; font-size:13px}
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end}
+    .col{flex:1 1 200px; min-width:200px}
+    label{display:block; font-size:13px; color:#333; margin-bottom:6px}
+    input, select{
+      width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; background:#fff
+    }
+    input[disabled]{background:var(--blue); color:#111; border-color:#d8eaff}
+    .table-wrap{overflow:auto; margin-top:14px}
+    table{width:100%; border-collapse:collapse; font-size:14px}
+    th, td{border:1px solid #dfe3ea; padding:10px 8px; text-align:center}
+    thead th{background:#0f2c44; color:#fff; font-weight:700}
+    thead tr.second th{background:#1f4560}
+    td.left, th.left{text-align:left}
+    td.lock, .lock{background:var(--blue)}
+    td.na{background:#f0f3f7;color:#888}
+    tfoot td{font-weight:700; background:#f7fbff}
+    .totals{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px}
+    .tile{border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:#fff}
+    .title{font-size:12px; color:var(--muted); margin-bottom:6px}
+    .big{font-size:26px; font-weight:800}
+    .note{font-size:12px; color:var(--muted); margin-top:6px}
+    .footer{margin-top:12px; font-size:12px; color:var(--muted)}
+    .brand{color:var(--brand); font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>💧 Calculadora de consumo de agua – Hogar</h1>
+      <p class="muted">Selecciona la tecnología <strong>Tradicional/Eficiente</strong> para precargar los caudales/volúmenes y completa los minutos o usos según aplique. Las celdas azules se calculan automáticamente.</p>
+
+      <div class="row">
+        <div class="col">
+          <label>Personas en el hogar</label>
+          <input id="personas" type="number" min="1" step="1" value="3">
+        </div>
+        <div class="col">
+          <label>Tipo de tecnología</label>
+          <select id="tecnologia">
+            <option value="traditional" selected>Tradicional</option>
+            <option value="efficient">Eficiente</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table id="tabla">
+          <thead>
+            <tr>
+              <th class="left">Instrumento</th>
+              <th>Tipo de tecnología</th>
+              <th>Volumen utilizado<br><small>(L/min o L/uso o L/día)</small></th>
+              <th>Usos a la semana</th>
+              <th>Minutos de uso al día</th>
+              <th>Volumen utilizado al día<br>(L/día)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-item="ducha">
+              <td class="left">Ducha (L/min) <small>por persona</small></td>
+              <td class="lock"><input class="lock" type="text" value="-" disabled></td>
+              <td class="lock"><input id="ducha_rate" class="lock" type="number" step="0.1" disabled></td>
+              <td class="na">n.a</td>
+              <td><input id="ducha_min" type="number" min="0" step="0.5" value="7"></td>
+              <td class="lock"><input id="ducha_ld" class="lock" type="text" disabled></td>
+            </tr>
+            <tr data-item="inodoro">
+              <td class="left">Inodoros (L/uso) <small>por persona</small></td>
+              <td class="lock"><input class="lock" type="text" value="-" disabled></td>
+              <td class="lock"><input id="inodoro_rate" class="lock" type="number" step="0.1" disabled></td>
+              <td><input id="inodoro_uses" type="number" min="0" step="1" value="21"></td>
+              <td class="na">n.a</td>
+              <td class="lock"><input id="inodoro_ld" class="lock" type="text" disabled></td>
+            </tr>
+            <tr data-item="beber">
+              <td class="left">Agua para beber (L/día) <small>por persona</small></td>
+              <td class="na">n.a</td>
+              <td><input id="beber_ld_input" type="number" min="0" step="0.1" value="2.0"></td>
+              <td class="na">n.a</td>
+              <td class="na">n.a</td>
+              <td class="lock"><input id="beber_ld" class="lock" type="text" disabled></td>
+            </tr>
+            <tr data-item="grifo">
+              <td class="left">Grifos (L/min) <small>por persona</small></td>
+              <td class="lock"><input class="lock" type="text" value="-" disabled></td>
+              <td class="lock"><input id="grifo_rate" class="lock" type="number" step="0.1" disabled></td>
+              <td class="na">n.a</td>
+              <td><input id="grifo_min" type="number" min="0" step="0.5" value="6"></td>
+              <td class="lock"><input id="grifo_ld" class="lock" type="text" disabled></td>
+            </tr>
+            <tr data-item="lavadora">
+              <td class="left">Lavadora (L/uso) <small>por hogar</small></td>
+              <td class="lock"><input class="lock" type="text" value="-" disabled></td>
+              <td class="lock"><input id="lavadora_rate" class="lock" type="number" step="0.1" disabled></td>
+              <td><input id="lavadora_uses" type="number" min="0" step="1" value="3"></td>
+              <td class="na">n.a</td>
+              <td class="lock"><input id="lavadora_ld" class="lock" type="text" disabled></td>
+            </tr>
+            <tr data-item="lavaplatos">
+              <td class="left">Lavaplatos (L/uso) <small>por hogar</small></td>
+              <td class="lock"><input class="lock" type="text" value="-" disabled></td>
+              <td class="lock"><input id="lavaplatos_rate" class="lock" type="number" step="0.1" disabled></td>
+              <td><input id="lavaplatos_uses" type="number" min="0" step="1" value="7"></td>
+              <td class="na">n.a</td>
+              <td class="lock"><input id="lavaplatos_ld" class="lock" type="text" disabled></td>
+            </tr>
+            <tr data-item="total">
+              <td class="left"><strong>Total consumo diario per cápita</strong></td>
+              <td class="na">-</td>
+              <td class="na">-</td>
+              <td class="na">-</td>
+              <td class="na">-</td>
+              <td class="lock"><input id="total_capita" class="lock" type="text" disabled></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="totals">
+        <div class="tile">
+          <div class="title">Consumo del hogar</div>
+          <div class="big"><span id="hogar_ld">0</span> <span class="brand">L/día</span></div>
+          <div class="note">Se calcula como <em>total per cápita × personas</em>.</div>
+        </div>
+        <div class="tile">
+          <div class="title">Consumo per cápita y caudal para población</div>
+          <div class="row" style="gap:8px; align-items:center">
+            <div style="flex:1 1 180px; min-width:180px">
+              <label style="margin:0 0 4px">Población (personas)</label>
+              <input id="poblacion" type="number" min="0" step="1" value="1000">
+            </div>
+            <div style="flex:2 1 260px; min-width:260px">
+              <div class="big"><span id="capita_ld">0</span> L/día • <span id="poblacion_caudal">0.00000</span> <span class="brand">m³/s</span></div>
+              <div class="note">Caudal = (consumo per cápita × población) ÷ 1000 ÷ 86400.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">Valores por tecnología precargados: <strong>Tradicional</strong> — Ducha 20 L/min, Inodoro 12 L/uso, Grifo 14 L/min, Lavadora 180 L/uso, Lavaplatos 12.5 L/uso. <strong>Eficiente</strong> — Ducha 10 L/min, Inodoro 6 L/uso, Grifo 8 L/min, Lavadora 50 L/uso, Lavaplatos 6 L/uso.</div>
+    </div>
+  </div>
+
+  <script>
+    // Conversión segura de números (admite coma o punto)
+    function num(v){
+      if (typeof v === 'number') return v;
+      if (!v) return 0;
+      v = (''+v).replace(',', '.'); // acepta coma decimal
+      var n = Number(v);
+      return isFinite(n) ? n : 0;
+    }
+    function fmt(n, d=2){ return num(n).toLocaleString('es-CO', {maximumFractionDigits:d, minimumFractionDigits:d}); }
+
+    // Tasas por tecnología
+    const rates = {
+      efficient:  { ducha:10, inodoro:6, grifo:8, lavadora:50, lavaplatos:6 },
+      traditional:{ ducha:20, inodoro:12, grifo:14, lavadora:180, lavaplatos:12.5 }
+    };
+
+    const ids = {
+      // rates
+      ducha_rate:'ducha_rate', inodoro_rate:'inodoro_rate', grifo_rate:'grifo_rate',
+      lavadora_rate:'lavadora_rate', lavaplatos_rate:'lavaplatos_rate',
+      // inputs
+      ducha_min:'ducha_min', inodoro_uses:'inodoro_uses', beber_ld_input:'beber_ld_input',
+      grifo_min:'grifo_min', lavadora_uses:'lavadora_uses', lavaplatos_uses:'lavaplatos_uses',
+      // outputs per row
+      ducha_ld:'ducha_ld', inodoro_ld:'inodoro_ld', beber_ld:'beber_ld', grifo_ld:'grifo_ld',
+      lavadora_ld:'lavadora_ld', lavaplatos_ld:'lavaplatos_ld', total_capita:'total_capita',
+      // totals
+      hogar_ld:'hogar_ld', capita_ld:'capita_ld', poblacion:'poblacion', poblacion_caudal:'poblacion_caudal',
+      personas:'personas', tecnologia:'tecnologia'
+    };
+
+    function setTechLabels(tech){
+      document.querySelectorAll('tr[data-item] td:nth-child(2) input.lock').forEach(el=>{
+        el.value = (tech==='efficient' ? 'Eficiente' : 'Tradicional');
+      });
+    }
+    function loadRates(tech){
+      const r = tech==='efficient' ? rates.efficient : rates.traditional;
+      document.getElementById(ids.ducha_rate).value = r.ducha;
+      document.getElementById(ids.inodoro_rate).value = r.inodoro;
+      document.getElementById(ids.grifo_rate).value = r.grifo;
+      document.getElementById(ids.lavadora_rate).value = r.lavadora;
+      document.getElementById(ids.lavaplatos_rate).value = r.lavaplatos;
+    }
+
+    function recalc(){
+      const personas = Math.max(1, Math.floor(num(document.getElementById(ids.personas).value)));
+      // Row computations (L/día per persona, salvo donde se indique)
+      const ducha_ld = num(document.getElementById(ids.ducha_rate).value) * num(document.getElementById(ids.ducha_min).value);
+      const inodoro_ld = num(document.getElementById(ids.inodoro_rate).value) * num(document.getElementById(ids.inodoro_uses).value) / 7;
+      const beber_ld = num(document.getElementById(ids.beber_ld_input).value);
+      const grifo_ld = num(document.getElementById(ids.grifo_rate).value) * num(document.getElementById(ids.grifo_min).value);
+      const lavadora_ld = ( num(document.getElementById(ids.lavadora_rate).value) * num(document.getElementById(ids.lavadora_uses).value) / 7 ) / personas;
+      const lavaplatos_ld = ( num(document.getElementById(ids.lavaplatos_rate).value) * num(document.getElementById(ids.lavaplatos_uses).value) / 7 ) / personas;
+
+      // Set row outputs
+      document.getElementById(ids.ducha_ld).value = fmt(ducha_ld);
+      document.getElementById(ids.inodoro_ld).value = fmt(inodoro_ld);
+      document.getElementById(ids.beber_ld).value = fmt(beber_ld);
+      document.getElementById(ids.grifo_ld).value = fmt(grifo_ld);
+      document.getElementById(ids.lavadora_ld).value = fmt(lavadora_ld);
+      document.getElementById(ids.lavaplatos_ld).value = fmt(lavaplatos_ld);
+
+      // Total per capita
+      const total_capita = ducha_ld + inodoro_ld + beber_ld + grifo_ld + lavadora_ld + lavaplatos_ld;
+      document.getElementById(ids.total_capita).value = fmt(total_capita);
+
+      // Household
+      const hogar_ld = total_capita * personas;
+      document.getElementById(ids.hogar_ld).textContent = fmt(hogar_ld);
+
+      // Per capita & population flow
+      document.getElementById(ids.capita_ld).textContent = fmt(total_capita);
+      const poblacion = Math.max(0, Math.floor(num(document.getElementById(ids.poblacion).value)));
+      const m3s = (total_capita * poblacion) / 1000 / 86400; // L/día → m3/s
+      document.getElementById(ids.poblacion_caudal).textContent = m3s.toLocaleString('es-CO', {maximumFractionDigits:5, minimumFractionDigits:5});
+    }
+
+    // Init
+    document.getElementById(ids.tecnologia).addEventListener('change', (e)=>{
+      const tech = e.target.value;
+      setTechLabels(tech);
+      loadRates(tech);
+      recalc();
+    });
+    ['input','change'].forEach(evt=>{
+      Object.values(ids).forEach(id=>{
+        const el = document.getElementById(id);
+        if(el && (el.tagName==='INPUT' || el.tagName==='SELECT')){
+          el.addEventListener(evt, recalc);
+        }
+      });
+    });
+
+    // First load
+    (function start(){
+      const tech = document.getElementById(ids.tecnologia).value;
+      setTechLabels(tech);
+      loadRates(tech);
+      recalc();
+    })();
+  </script>
+</body>
+</html>
