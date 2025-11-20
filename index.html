@@ -234,7 +234,7 @@
       const capitaEl = document.getElementById(ids.capita_ld); if (capitaEl) { capitaEl.textContent = fmt(total_capita); }
       const poblacion = Math.max(0, Math.floor(num(document.getElementById(ids.poblacion).value)));
       const m3s = (total_capita * poblacion) / 1000 / 86400; // L/día → m3/s
-      document.getElementById(ids.poblacion_caudal).textContent = m3s.toLocaleString('es-CO', {maximumFractionDigits:5, minimumFractionDigits:5});
+      document.getElementById(ids.poblacion_caudal).textContent = m3s.toLocaleString('es-CO', {maximumFractionDigits:2, minimumFractionDigits:2});
     }
 
     // Init
